@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorry Ayesha | From Daniyal</title>
+    <style>
+        /* Modern Reset & Root Design Tokens */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: rgba(22, 24, 34, 0.9);
+            --pink-accent: #f43f5e;
+            --pink-glow: rgba(244, 63, 94, 0.35);
+            --purple-accent: #a855f7;
+            --purple-glow: rgba(168, 85, 247, 0.35);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas Background */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Confetti Canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Container Layout */
+        .app-container {
+            width: 100%;
+            max-width: 440px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Tag */
+        .top-tag {
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #fda4af;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.15);
+        }
+
+        /* Glassmorphism Cards */
+        .card-wrapper {
+            position: relative;
+            width: 100%;
+            min-height: 520px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 32px 26px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 0 1px 1px rgba(255, 255, 255, 0.08);
+            position: absolute;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: scale(0.92) translateY(12px);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .card.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+            visibility: visible;
+        }
+
+        /* Typography */
+        h1, h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+        }
+
+        .sub-heading {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--pink-accent);
+            margin-bottom: 8px;
+        }
+
+        p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, var(--pink-accent), var(--purple-accent));
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 18px var(--pink-glow);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0.97);
+        }
+
+        /* Bear Avatar */
+        .bear-avatar {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            animation: floatSlow 3s ease-in-out infinite;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Step 3 Punch Target */
+        .punch-target {
+            width: 120px;
+            height: 120px;
+            margin: 14px auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(168, 85, 247, 0.2));
+            border: 3px solid var(--pink-accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 0 24px var(--pink-glow);
+            transition: transform 0.1s ease;
+        }
+
+        .punch-target:active {
+            transform: scale(0.88);
+        }
+
+        .punch-emoji {
+            font-size: 42px;
+        }
+
+        .punch-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--pink-accent);
+            margin-top: 4px;
+        }
+
+        .punch-feedback {
+            position: absolute;
+            top: -24px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--pink-accent);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .punch-feedback.show {
+            opacity: 1;
+            top: -34px;
+        }
+
+        /* Step 4 Promise Lock */
+        .promise-lock-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #fda4af;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .promise-lock-btn.locked {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        /* Step 5 Jar */
+        .jar-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 22px 18px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fbcfe8;
+            line-height: 1.5;
+            transition: opacity 0.2s ease;
+        }
+
+        .jar-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* STEP 6 FIXED LETTER STYLING */
+        .letter-card-container {
+            background: rgba(12, 14, 22, 0.85);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            border-radius: 18px;
+            padding: 22px;
+            text-align: left;
+            margin-bottom: 22px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .letter-para {
+            font-size: 13.5px;
+            line-height: 1.8;
+            color: #e5e7eb;
+            margin-bottom: 14px;
+            letter-spacing: 0.2px;
+        }
+
+        .letter-para:last-child {
+            margin-bottom: 0;
+        }
+
+        .letter-signature {
+            margin-top: 18px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--pink-accent);
+            letter-spacing: 0.5px;
+        }
+
+        /* Footer */
+        .footer-text {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Particle Canvas -->
+    <canvas id="bgCanvas"></canvas>
+    <!-- Confetti Overlay Canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <div class="app-container">
+        <!-- Top Tag -->
+        <div class="top-tag">
+            <span>✨ For Ayesha • From Daniyal</span>
+        </div>
+
+        <div class="card-wrapper">
+
+            <!-- STEP 1: ENTRY SCREEN -->
+            <div id="step-1" class="card active">
+                <div class="bear-avatar">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <circle cx="30" cy="25" r="12" fill="#7a5230" />
+                        <circle cx="70" cy="25" r="12" fill="#7a5230" />
+                        <circle cx="30" cy="25" r="7" fill="#e2a76f" />
+                        <circle cx="70" cy="25" r="7" fill="#e2a76f" />
+                        <circle cx="50" cy="50" r="32" fill="#8d5b28" />
+                        <ellipse cx="50" cy="56" rx="16" ry="12" fill="#e2a76f" />
+                        <circle cx="50" cy="50" r="4" fill="#3a1e05" />
+                        <circle cx="40" cy="44" r="3.5" fill="#222" />
+                        <circle cx="60" cy="44" r="3.5" fill="#222" />
+                        <path d="M 45 60 Q 50 65 55 60" stroke="#3a1e05" stroke-width="2" fill="none" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="sub-heading">Hey Ayesha...</div>
+                <h1>Open This Slowly?</h1>
+                <p>Daniyal ne aapke liye yeh ek chota sa message banaya hai. Ek baar zaroor dekhna.</p>
+                <button onclick="goToStep(2)" class="btn-primary">
+                    <span>Aage Badho</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+            <!-- STEP 2: APOLOGY INTRO -->
+            <div id="step-2" class="card">
+                <div class="bear-avatar">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <circle cx="50" cy="50" r="35" fill="#f3f4f6" />
+                        <polygon points="20,25 35,40 20,50" fill="#f3f4f6" />
+                        <polygon points="80,25 65,40 80,50" fill="#f3f4f6" />
+                        <polygon points="23,30 33,40 23,48" fill="#f43f5e" opacity="0.4" />
+                        <polygon points="77,30 67,40 77,48" fill="#f43f5e" opacity="0.4" />
+                        <ellipse cx="38" cy="48" rx="4" ry="6" fill="#1f2937" />
+                        <ellipse cx="62" cy="48" rx="4" ry="6" fill="#1f2937" />
+                        <circle cx="39" cy="46" r="1.5" fill="white" />
+                        <circle cx="63" cy="46" r="1.5" fill="white" />
+                        <path d="M 45 62 Q 50 56 55 62" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                        <ellipse cx="33" cy="56" rx="2" ry="3" fill="#38bdf8" />
+                    </svg>
+                </div>
+                <div class="sub-heading">I Messed Up</div>
+                <h1>Galti Ho Gayi!</h1>
+                <p>Ayesha, Daniyal se aapki <strong>baat na maan kar</strong> galti ho gayi. Na koi faltu bahana hai, na koi justification — bas sachhi maafi!</p>
+                <button onclick="goToStep(3)" class="btn-primary">
+                    <span>Gussa Nikalo (Hit Reset)</span>
+                    <span>🥊</span>
+                </button>
+            </div>
+
+            <!-- STEP 3: STRESS RELIEF PILLOW -->
+            <div id="step-3" class="card">
+                <div class="sub-heading">Vent Box</div>
+                <h1>Hit Reset 🥊</h1>
+                <p>Agar abhi bhi gussa aa raha hai, toh jitni baar chaho tap karke gussa nikal lo!</p>
+                
+                <div id="punchTarget" class="punch-target" onclick="handlePunch()">
+                    <span class="punch-emoji">🥊</span>
+                    <span class="punch-label">Tap Here</span>
+                    <span id="punchFeedback" class="punch-feedback">Ouch!</span>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <span style="font-size: 12px; color: #9ca3af;">Punch Count: </span>
+                    <span id="punchCounter" style="font-size: 18px; font-weight: 700; color: var(--pink-accent);">0</span>
+                    <p id="punchStatus" style="font-size: 11px; color: #6b7280; margin-top: 4px; margin-bottom: 0;">Tap to release frustration!</p>
+                </div>
+
+                <button onclick="goToStep(4)" class="btn-primary">
+                    <span>Ab Theek Hai</span>
+                    <span>✓</span>
+                </button>
+            </div>
+
+            <!-- STEP 4: PINKY PROMISE -->
+            <div id="step-4" class="card">
+                <div class="sub-heading">Best-Friend Promise</div>
+                <h1>Pinky Promise 🤙</h1>
+                <p>"Next time se hamesha aapki baat pehle sununga aur full respect dunga!"</p>
+
+                <div id="promiseBtn" class="promise-lock-btn" onclick="togglePromiseLock()">
+                    <span id="lockIcon">🔓</span>
+                    <span id="promiseBtnText">Tap to Lock Promise</span>
+                </div>
+                <p id="promiseHint" style="font-size: 11px; color: #6b7280; margin-bottom: 22px;">Button tap karke promise fix kar do.</p>
+
+                <button id="step4NextBtn" onclick="goToStep(5)" class="btn-primary" style="opacity: 0.5; pointer-events: none;">
+                    <span>Aage Badho: Promise Jar</span>
+                    <span>🫙</span>
+                </button>
+            </div>
+
+            <!-- STEP 5: PROMISE JAR -->
+            <div id="step-5" class="card">
+                <div class="sub-heading">Best-Friend Vows</div>
+                <h1>Promise Jar 🫙</h1>
+                
+                <div id="jarBox" class="jar-box">
+                    "Coffee / Treat on me next time we meet! 🍦"
+                </div>
+
+                <div class="jar-grid">
+                    <button onclick="drawPromise()" class="btn-secondary">🎲 Dusra Dekho</button>
+                    <button onclick="keepPromise()" class="btn-secondary" style="border-color: rgba(244, 63, 94, 0.3); color: #fda4af;">✨ Keep This</button>
+                </div>
+
+                <button onclick="goToStep(6)" class="btn-primary">
+                    <span>Note Padho</span>
+                    <span>✉️</span>
+                </button>
+            </div>
+
+            <!-- STEP 6: SINCERE LETTER (PERFECTLY FORMATTED & SPACED) -->
+            <div id="step-6" class="card">
+                <div class="sub-heading">Apology Note</div>
+                <h1>Dear Ayesha</h1>
+
+                <div class="letter-card-container">
+                    <p class="letter-para">I am really sorry ke maine aapki baat nahi maani. Mujhse galti ho gayi, aur mujhe realize ho raha hai ke mujhe aapki baat sunni chahiye thi.</p>
+                    <p class="letter-para">Aap meri sabse achhi dost ho, aur main humari friendship ko bilkul spoil nahi karna chahta.</p>
+                    <p class="letter-para">Next time se aisi galti nahi hogi.</p>
+                    <div class="letter-signature">— Daniyal</div>
+                </div>
+
+                <button onclick="goToStep(7)" class="btn-primary">
+                    <span>Aakhri Sawal</span>
+                    <span>❓</span>
+                </button>
+            </div>
+
+            <!-- STEP 7: FORGIVENESS CARD -->
+            <div id="step-7" class="card">
+                <div class="sub-heading">Final Decision</div>
+                <h1 id="finalTitle">Forgive Daniyal?</h1>
+                <p id="finalSubtitle">Aage se hamesha aapki baat pehle suni jayegi!</p>
+
+                <div id="decisionButtons" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                    <button onclick="acceptApology()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4);">
+                        <span>Aapko Maaf Kiya 🎉</span>
+                    </button>
+
+                    <button id="thinkBtn" onclick="playfulRejection()" class="btn-secondary">
+                        <span>Abhi Bhi Thoda Gussa Hu 🙈</span>
+                    </button>
+                </div>
+
+                <div id="acceptedView" class="hidden" style="width: 100%;">
+                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 16px; border-radius: 16px; margin-bottom: 20px;">
+                        <p style="color: #34d399; font-weight: 700; margin-bottom: 6px;">Thank You Ayesha! 🎉</p>
+                        <p style="color: #e5e7eb; font-size: 13px; margin-bottom: 0;">Daniyal aage se bilkul galti nahi karega!</p>
+                    </div>
+                    <button onclick="resetApp()" class="btn-secondary">Dobara Dekho 🔄</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer-text">
+            Sincere Apology • Best Friends Forever
+        </div>
+    </div>
+
+    <!-- PURE VANILLA JAVASCRIPT LOGIC -->
+    <script>
+        /* ==============================================
+           1. WEB AUDIO API SYNTHESIZER
+           ============================================== */
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playPopSound() {
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+        }
+
+        function playPunchSound() {
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.12);
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.12);
+        }
+
+        function playLockSound() {
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.25);
+        }
+
+        function playCelebrationChime() {
+            initAudio();
+            if (!audioCtx) return;
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime + idx * 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.08 + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + idx * 0.08);
+                osc.stop(audioCtx.currentTime + idx * 0.08 + 0.3);
+            });
+        }
+
+        /* ==============================================
+           2. NAVIGATION LOGIC
+           ============================================== */
+        let currentStep = 1;
+
+        function goToStep(stepNumber) {
+            playPopSound();
+            const currentCard = document.getElementById(`step-${currentStep}`);
+            const nextCard = document.getElementById(`step-${stepNumber}`);
+
+            if (currentCard) {
+                currentCard.classList.remove('active');
+            }
+
+            currentStep = stepNumber;
+
+            setTimeout(() => {
+                if (nextCard) {
+                    nextCard.classList.add('active');
+                }
+            }, 150);
+        }
+
+        /* ==============================================
+           3. STEP 3: STRESS RELIEF PILLOW
+           ============================================== */
+        let punchCount = 0;
+        const punchPhrases = ["Ouch!", "Aur maro!", "Gussa kam hua?", "Sorry Ayesha!", "Galti ho gayi!"];
+
+        function handlePunch() {
+            playPunchSound();
+            punchCount++;
+
+            const counterEl = document.getElementById('punchCounter');
+            const feedbackEl = document.getElementById('punchFeedback');
+            const statusEl = document.getElementById('punchStatus');
+
+            counterEl.innerText = punchCount;
+
+            const phrase = punchPhrases[(punchCount - 1) % punchPhrases.length];
+            feedbackEl.innerText = phrase;
+            feedbackEl.classList.add('show');
+
+            setTimeout(() => {
+                feedbackEl.classList.remove('show');
+            }, 300);
+
+            if (punchCount >= 5) {
+                statusEl.innerText = "Gussa thoda kam hua? Ab aage badh sakte ho!";
+                statusEl.style.color = '#f43f5e';
+            }
+        }
+
+        /* ==============================================
+           4. STEP 4: PINKY PROMISE LOCK
+           ============================================== */
+        let promiseLocked = false;
+
+        function togglePromiseLock() {
+            if (promiseLocked) return;
+            playLockSound();
+            promiseLocked = true;
+
+            const btn = document.getElementById('promiseBtn');
+            const icon = document.getElementById('lockIcon');
+            const text = document.getElementById('promiseBtnText');
+            const hint = document.getElementById('promiseHint');
+            const nextBtn = document.getElementById('step4NextBtn');
+
+            btn.classList.add('locked');
+            icon.innerText = "🔒";
+            text.innerText = "Promise Locked!";
+            hint.innerText = "Promise Saved: Next time se hamesha aapki baat pehle!";
+            hint.style.color = "#34d399";
+
+            nextBtn.style.opacity = "1";
+            nextBtn.style.pointerEvents = "auto";
+        }
+
+        /* ==============================================
+           5. STEP 5: PROMISE JAR
+           ============================================== */
+        const promises = [
+            "\"Coffee / Treat on me next time we meet! 🍦\"",
+            "\"I won't argue when you're right!\"",
+            "\"Will always listen to your advice pehle!\"",
+            "\"Saari baatein dhyaan se sununga!\"",
+            "\"Next time pehle aapki permission ka wait karunga!\""
+        ];
+        let currentPromiseIdx = 0;
+
+        function drawPromise() {
+            playPopSound();
+            const jarBox = document.getElementById('jarBox');
+            jarBox.style.opacity = "0";
+
+            setTimeout(() => {
+                currentPromiseIdx = (currentPromiseIdx + 1) % promises.length;
+                jarBox.innerText = promises[currentPromiseIdx];
+                jarBox.style.opacity = "1";
+            }, 150);
+        }
+
+        function keepPromise() {
+            playLockSound();
+            const jarBox = document.getElementById('jarBox');
+            const oldText = jarBox.innerText;
+            jarBox.innerText = "Saved: " + oldText + " ✨";
+            setTimeout(() => {
+                jarBox.innerText = oldText;
+            }, 1500);
+        }
+
+        /* ==============================================
+           6. STEP 7: FORGIVENESS & CONFETTI
+           ============================================== */
+        let rejectCount = 0;
+
+        function acceptApology() {
+            playCelebrationChime();
+            launchConfetti();
+
+            document.getElementById('finalTitle').innerText = "Maafi Mil Gayi! 🎉";
+            document.getElementById('finalSubtitle').innerText = "Thank you Ayesha! Daniyal aage se dhyaan rakhega.";
+            document.getElementById('decisionButtons').classList.add('hidden');
+            document.getElementById('acceptedView').classList.remove('hidden');
+        }
+
+        function playfulRejection() {
+            playPopSound();
+            rejectCount++;
+            const thinkBtn = document.getElementById('thinkBtn');
+
+            const responses = [
+                "Ek baar aur soch lo? 🥺",
+                "Ek mauka toh banta hai!",
+                "Sacch me sorry bol raha hai!",
+                "Maan jao Ayesha!",
+                "Ab Aapko Maaf Kiya dabado please!"
+            ];
+
+            thinkBtn.innerText = responses[Math.min(rejectCount - 1, responses.length - 1)];
+            
+            const offsetX = (Math.random() - 0.5) * 20;
+            const offsetY = (Math.random() - 0.5) * 10;
+            thinkBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        }
+
+        function resetApp() {
+            punchCount = 0;
+            promiseLocked = false;
+            rejectCount = 0;
+
+            document.getElementById('punchCounter').innerText = "0";
+            document.getElementById('decisionButtons').classList.remove('hidden');
+            document.getElementById('acceptedView').classList.add('hidden');
+            document.getElementById('finalTitle').innerText = "Forgive Daniyal?";
+            document.getElementById('finalSubtitle').innerText = "Aage se hamesha aapki baat pehle suni jayegi!";
+
+            const btn = document.getElementById('promiseBtn');
+            btn.classList.remove('locked');
+            document.getElementById('lockIcon').innerText = "🔓";
+            document.getElementById('promiseBtnText').innerText = "Tap to Lock Promise";
+            document.getElementById('promiseHint').innerText = "Button tap karke promise fix kar do.";
+            document.getElementById('promiseHint').style.color = "#6b7280";
+
+            const nextBtn = document.getElementById('step4NextBtn');
+            nextBtn.style.opacity = "0.5";
+            nextBtn.style.pointerEvents = "none";
+
+            goToStep(1);
+        }
+
+        /* ==============================================
+           7. BACKGROUND PARTICLES
+           ============================================== */
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeBgCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeBgCanvas);
+        resizeBgCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * bgCanvas.width;
+                this.y = Math.random() * bgCanvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedY = Math.random() * -0.5 - 0.2;
+                this.alpha = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.y += this.speedY;
+                if (this.y < 0) {
+                    this.y = bgCanvas.height;
+                    this.x = Math.random() * bgCanvas.width;
+                }
+            }
+            draw() {
+                bgCtx.fillStyle = `rgba(244, 63, 94, ${this.alpha})`;
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateBg() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        /* ==============================================
+           8. CANVAS CONFETTI ENGINE
+           ============================================== */
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let confettiPieces = [];
+
+        function resizeConfettiCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeConfettiCanvas);
+        resizeConfettiCanvas();
+
+        function launchConfetti() {
+            confettiPieces = [];
+            const colors = ['#f43f5e', '#a855f7', '#fbbf24', '#34d399', '#ffffff'];
+            for (let i = 0; i < 120; i++) {
+                confettiPieces.push({
+                    x: confettiCanvas.width / 2,
+                    y: confettiCanvas.height / 2 + 50,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.8) * 14,
+                    gravity: 0.25,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            let activeCount = 0;
+
+            confettiPieces.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.rotation += p.rotationSpeed;
+
+                if (p.y < confettiCanvas.height) {
+                    activeCount++;
+                    confettiCtx.save();
+                    confettiCtx.translate(p.x, p.y);
+                    confettiCtx.rotate((p.rotation * Math.PI) / 180);
+                    confettiCtx.fillStyle = p.color;
+                    confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    confettiCtx.restore();
+                }
+            });
+
+            if (activeCount > 0) {
+                requestAnimationFrame(animateConfetti);
+            }
+        }
+    </script>
+</body>
+</html>
